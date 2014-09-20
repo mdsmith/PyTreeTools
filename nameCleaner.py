@@ -5,11 +5,16 @@ import re
 
 def parse_fasta(fasta_file_name):
   fh = open(fasta_file_name, 'r')
-  lines = fh.read()
+  lines = fh.readlines()
   return lines
 
 def clean_seqs(seqs):
-  return re.sub('[^a-zA-Z0-9\n\>]', '_', seqs)
+  for i,line in enumerate(seqs):
+    if line[0] == '>':
+      line = re.sub('[^a-zA-Z0-9\n\>]', '_', line)
+      line = line.strip('\n')
+    seqs[i] = line
+  return seqs
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
@@ -17,4 +22,6 @@ if __name__ == "__main__":
   args = parser.parse_args()
   seqs = parse_fasta(args.fasta_file)
   clean = clean_seqs(seqs)
-  print(clean)
+  for line in clean:
+    print(line)
+  #print(clean)
