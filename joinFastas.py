@@ -10,8 +10,10 @@ def join_fastas(file1, file2):
   out = ""
   name = fh1_lines[0]
   seq = ""
-  for line in fh1_lines[1:]:
-    if line[0] == '>':
+  for i,line in enumerate(fh1_lines[1:]):
+    if i == len(fh1_lines) - 2:
+      seq += line
+    if line[0] == '>' or i == len(fh1_lines) - 2:
       seq2 = ""
       on = False
       for line2 in fh2_lines:
