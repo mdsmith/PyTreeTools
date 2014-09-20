@@ -13,7 +13,8 @@ def parse_fasta(fasta_file_name):
     if line[0] == '>' or i == len(lines) - 1:
       if i == len(lines) - 1:
         seq += line
-      seqs[name] = seq.strip('\n')
+      if i != 0:
+        seqs[name.strip('\n')] = seq.strip('\n')
       name = ""
       seq = ""
       name = line
@@ -40,6 +41,7 @@ def print_dict_to_fasta(seqs):
   for key, value in seqs.items():
     print(key)
     print(value)
+    print('')
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
