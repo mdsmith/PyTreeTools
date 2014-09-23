@@ -23,6 +23,11 @@ def parse_fasta(fasta_file_name):
       seq += line
   return seqs
 
+def emit_fasta(seqs):
+  for name,seq in seqs.items():
+    print(">" + name)
+    print(seq)
+
 def f2p(seqs):
   num = len(seqs)
   length = len(list(seqs.values())[0])
@@ -53,10 +58,14 @@ def phylnames(seqs):
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument('fasta_file', help="the fasta file to convert")
+  parser.add_argument('-f', action='store_true', help="just rename the sequences to phylip")
   args = parser.parse_args()
   seqs = parse_fasta(args.fasta_file)
   seqs = phylnames(seqs)
-  p_seqs, num, length = f2p(seqs)
-  print(" " + str(num) + " " + str(length))
-  for line in p_seqs:
-    print(line)
+  if not args.f:
+    p_seqs, num, length = f2p(seqs)
+    print(" " + str(num) + " " + str(length))
+    for line in p_seqs:
+      print(line)
+  else:
+    emit_fasta(seqs)
