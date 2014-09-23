@@ -22,7 +22,7 @@ class Tree:
     #self.root = self.make_root(newick_string)
     #self.root = Node()
     #self.make_node(newick_string.strip(';'), self.root)
-    self.root = make_node_ret(newick_string.strip(';'), None)
+    self.root = make_node_ret(newick_string.strip(';\n'), None)
 
   def find_node(self, cur, node_n):
     if cur.name == node_n:
@@ -131,7 +131,7 @@ class Tree:
         if i < len(node.children)-1:
           newick += ','
       newick += ')'
-      return newick + node.name + ":" + node.length
+      return newick + str(node.name) + ":" + str(node.length)
 
   def print_tree(self):
     self.root.print_node(0)
@@ -264,7 +264,6 @@ def make_node_ret(ns, parent):
       for split in splits:
         chunks.append(full[last+1:split])
         last = split
-      print(chunks)
       for chunk in chunks:
         cur.children.append(make_node_ret(chunk, cur))
     cur.parent = parent

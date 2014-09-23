@@ -34,9 +34,19 @@ def clean_node_name(node):
   for c in node.children:
     clean_node_name(c)
 
+def is_num(s):
+  try:
+    float(s)
+    return True
+  except ValueError:
+    return False
+
 def clean_name(inname):
-  outname = re.sub('[^a-zA-Z0-9\n\>]', '_', inname)
-  return outname
+  if is_num(inname):
+    return ""
+  else:
+    outname = re.sub('[^a-zA-Z0-9\n\>]', '_', inname)
+    return outname
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
@@ -44,6 +54,9 @@ if __name__ == "__main__":
   args = parser.parse_args()
   lines = parse_file(args.infile)
   clean = clean_seqs(lines)
-  for line in clean:
-    print(line)
+  if isinstance(clean, list):
+    for line in clean:
+      print(line)
+  else:
+    print(clean)
   #print(clean)
