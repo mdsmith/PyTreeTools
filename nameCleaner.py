@@ -12,7 +12,7 @@ def clean_seqs(seqs):
   for i,line in enumerate(seqs):
     if line[0] == '>':
       line = re.sub('[^a-zA-Z0-9\n\>]', '_', line)
-      line = line.strip('\n')
+    line = line.strip('\n')
     seqs[i] = line
   return seqs
 
