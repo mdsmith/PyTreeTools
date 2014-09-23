@@ -3,6 +3,7 @@
 import argparse
 import sys
 import string
+import math
 
 def parse_fasta(fasta_file_name):
   fh = open(fasta_file_name, 'r')
@@ -51,8 +52,12 @@ def phylnames(seqs):
   p_seqs = {}
   alpha = list(string.ascii_lowercase) + list(string.ascii_uppercase)
   for name, key_list in p_chain.items():
-    for i,key in enumerate(key_list):
-      p_seqs[name + alpha[i]] = seqs[key]
+    if len(key_list) > 52:
+      for i,key in enumerate(key_list):
+        p_seqs[name[:-1] + alpha[math.floor(i/52)] + alpha[i%52]] = seqs[key]
+    else:
+      for i,key in enumerate(key_list):
+        p_seqs[name + alpha[i]] = seqs[key]
   return p_seqs
 
 if __name__ == "__main__":

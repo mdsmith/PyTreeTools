@@ -1,9 +1,3 @@
-#! /usr/bin/env python3
-
-import argparse
-import parsers
-
-"""
 class Node:
   def __init__(self):
     self.children = []
@@ -124,6 +118,20 @@ class Tree:
       self.make_node(right, new_right)
     print(parent.name)
 
+  def to_newick_string(self):
+    return self.node_newick(self.root)
+
+  def node_newick(self, node):
+    if len(node.children) == 0:
+      return node.name + ":" + node.length
+    else:
+      newick = "("
+      for i,c in enumerate(node.children):
+        newick += self.node_newick(c)
+        if i < len(node.children)-1:
+          newick += ','
+      newick += ')'
+      return newick + node.name + ":" + node.length
 
   def print_tree(self):
     self.root.print_node(0)
@@ -212,50 +220,53 @@ def make_node_ret(ns, parent):
     cur.parent = parent
   else:
     pc = 0
-    split = -1
+    #split = -1
+    splits = []
     for i,c in enumerate(ns):
       if c == '(':
         pc += 1
       elif c == ')':
         pc -= 1
       elif c == "," and pc == 1:
-        split = i
-    if split == -1:
+        #split = i
+        splits.append(i)
+    #if split == -1:
+    if len(splits) == 0:
+      print("Split point not found...")
+      print(ns)
       exit(1)
-    left = ns[1:split]
-    right = ns[split + 1:ns.rfind(')')]
-    up = ns[ns.rfind(')') + 1:]
-    if up != "":
-      #self.make_node(up, parent)
-      if ':' in up:
-        cur.name, cur.length = up.split(':')
-      else:
-        cur.name = up
-    cur.children.append(make_node_ret(left, cur))
-    cur.children.append(make_node_ret(right, cur))
+    elif len(splits) == 1:
+      split = splits[0]
+      left = ns[1:split]
+      right = ns[split + 1:ns.rfind(')')]
+      up = ns[ns.rfind(')') + 1:]
+      if up != "":
+        #self.make_node(up, parent)
+        if ':' in up:
+          cur.name, cur.length = up.split(':')
+        else:
+          cur.name = up
+      cur.children.append(make_node_ret(left, cur))
+      cur.children.append(make_node_ret(right, cur))
+    else:
+      up = ns[ns.rfind(')') + 1:]
+      if up != "":
+        ns = ns[:ns.rfind(')')]
+        #self.make_node(up, parent)
+        if ':' in up:
+          cur.name, cur.length = up.split(':')
+        else:
+          cur.name = up
+      chunks = []
+      full = ns
+      last = 0
+      splits.append(len(ns))
+      for split in splits:
+        chunks.append(full[last+1:split])
+        last = split
+      print(chunks)
+      for chunk in chunks:
+        cur.children.append(make_node_ret(chunk, cur))
     cur.parent = parent
   #print(cur.name)
   return cur
-"""
-
-def parse_newick(newick_file):
-  fh = open(newick_file, 'r')
-  lines = fh.readlines()
-  #newick_validate(lines)
-  return lines
-
-if __name__ == "__main__":
-  parser = argparse.ArgumentParser()
-  parser.add_argument('newick_file', help="the newick file with ages and \
-                                          notations")
-  parser.add_argument('node', help="the node to get the average age within")
-  args = parser.parse_args()
-
-  newick = parse_newick(args.newick_file)
-  tree = parsers.Tree(newick[0].strip('\n'))
-  #tree.print_tree()
-  print(tree.avg_dist(args.node))
-  #tree.tree_to_newick()
-  #tree.reroot("DE")
-  #tree.tree_to_newick()
-
