@@ -216,9 +216,11 @@ def make_node_ret(ns, parent):
     #newNode = Node()
     #newNode.name, newNode.length = ns.split(':')
     #parent.children.append(newNode)
+    #print(ns)
     cur.name, cur.length = ns.split(':')
     cur.parent = parent
   else:
+    #print(ns)
     pc = 0
     #split = -1
     splits = []
@@ -249,14 +251,16 @@ def make_node_ret(ns, parent):
       cur.children.append(make_node_ret(left, cur))
       cur.children.append(make_node_ret(right, cur))
     else:
+      #print("polytomy")
       up = ns[ns.rfind(')') + 1:]
       if up != "":
-        ns = ns[:ns.rfind(')')]
+        #ns = ns[:ns.rfind(')')]
         #self.make_node(up, parent)
         if ':' in up:
           cur.name, cur.length = up.split(':')
         else:
           cur.name = up
+      ns = ns[:ns.rfind(')')]
       chunks = []
       full = ns
       last = 0
