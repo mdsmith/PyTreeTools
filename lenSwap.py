@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import argparse
+#import sys
 
 def sub_lengths(newick, new_len_dict):
   #print(newick)
@@ -35,6 +36,9 @@ def get_dict(fit_file, length_formula):
         value = value.strip(';\n')
         if param in length_formula:
           new_dict[name] = value
+  #for key, value in new_dict.items():
+    #print(key, file=sys.stderr)
+    #print(value, file=sys.stderr)
   return new_dict
 
 def parse_newick(newick_file):
