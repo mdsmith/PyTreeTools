@@ -11,6 +11,12 @@ def sub_lengths(newick, new_len_dict):
     #old = newick[newick.find(key + ":"):len(key)]
     #old = newick[newick.find(key + ":"):newick.find(key + ":") + len(key)]
     start = newick.find(key + ":") + len(key) + 1
+    #print(key)
+    #print(start)
+    #print(newick)
+    #print(newick[start:].find(')'))
+    #print(newick[start:].find(','))
+    #print(newick[start:])
     end = min([i for i in [newick[start:].find(')'),newick[start:].find(',')]
       if i > 0]) + start
     #old = newick[start:end]
