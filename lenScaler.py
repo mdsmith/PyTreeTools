@@ -26,7 +26,7 @@ def scale_lengths(newick, scale):
     #print(len(key))
     last_end = end
     #print(old)
-    print(newick[start:end])
+    #print(newick[start:end])
 
     newick = newick[:start] + str((float(newick[start:end]) * float(scale))) + newick[end:]
   return newick
@@ -35,7 +35,7 @@ def parse_newick(newick_file):
   fh = open(newick_file, 'r')
   lines = fh.readlines()
   #newick_validate(lines)
-  return lines[0]
+  return lines[0].strip('\n')
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
