@@ -1,9 +1,19 @@
 #! /usr/bin/env python3
 
 import argparse
+import parsers
 #import sys
 
-def scale_lengths(newick, scale):
+def scale_lengths(tree, scale):
+  scale_node(tree.root, scale)
+  return tree.to_newick_string()
+
+def scale_node(node, scale):
+  node.length = float(node.length) * scale
+  for c in node.children:
+    scale_node(c, scale)
+
+def scale_lengths_old(newick, scale):
   #print(newick)
   #print(new_len_dict)
   num = newick.count(':')
@@ -45,5 +55,6 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   newick = parse_newick(args.newick_file)
-  new_newick = scale_lengths(newick, args.scale)
+  tree = parsers.Tree(newick)
+  new_newick = scale_lengths(tree, float(args.scale))
   print(new_newick)

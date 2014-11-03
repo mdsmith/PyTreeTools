@@ -9,7 +9,7 @@ class Node:
       print("\t", end="")
     if self.parent is not None:
       print(self.parent.name + " ", end="")
-    print(self.name, ':', self.length)
+    print(self.name, ':', str(self.length))
     #print(len(self.children))
     for c in self.children:
       c.print_node(depth+1)
@@ -89,6 +89,7 @@ class Tree:
       #newNode.name, newNode.length = ns.split(':')
       #parent.children.append(newNode)
       parent.name, parent.length = ns.split(':')
+      parent.length = float(parent.length)
     else:
       pc = 0
       split = -1
@@ -123,7 +124,7 @@ class Tree:
 
   def node_newick(self, node):
     if len(node.children) == 0:
-      return node.name + ":" + node.length
+      return node.name + ":" + str(node.length)
     else:
       newick = "("
       for i,c in enumerate(node.children):
