@@ -1,3 +1,78 @@
+def emit_fasta(seqs):
+  for name,seq in seqs.items():
+    print(">" + name)
+    print(seq)
+
+# file as lines
+def parse_gb(gb_file):
+  import re
+  members = ["DEFINITION", "ACCESSION", "FEATURES", "ORIGIN"]
+  json = {}
+  sequence = {}
+  current_member = ""
+  on = False
+  for line in gb_file:
+    if "//" in line:
+      on = False
+      json[sequence["ACCESSION"]] = sequence
+      sequence = {}
+      current_member = ""
+    else:
+      #last_current_member = current_member
+      tokens = line.split()
+      if len(tokens) == 0:
+        continue
+      last_mem = current_member
+      if re.match('[A-Z]', tokens[0]):
+        for member in members:
+          if member == tokens[0]:
+            current_member = member
+        if current_member == last_mem:
+          # Unknown new token detected, do not parse
+          on = False
+          continue
+        else:
+          # Known new token detected, parse for new token
+          on = True
+          sequence[current_member] = ' '.join(tokens[1:])
+      else:
+        # No new token detected, parse for old token
+        if on:
+          sequence[current_member] = (sequence[current_member]
+                                      + ' '.join(tokens))
+  return json
+
+def json_to_fasta(  seqs_json,
+                    accn = True,
+                    collection_date=True,
+                    definition=True,
+                    clean_names=True):
+  import re
+  from nameCleaner import clean_name
+  fasta_dict = {}
+  for accession, json_data in seqs_json.items():
+    name = ""
+    if accn:
+      name += accession
+    if definition:
+      name += "_" + json_data["DEFINITION"]
+    if collection_date:
+      features = json_data["FEATURES"]
+      date = re.search('collection_date', features)
+      if not date:
+        continue
+      features = features[date.end():]
+      date = features.split('\"')[1]
+      name += "_" + str(date)
+    if clean_names:
+      name = clean_name(name)
+    rough_seq = json_data["ORIGIN"]
+    rough_seq = rough_seq.replace(' ', '')
+    seq = ''.join([c for c in rough_seq if not c.isdigit()])
+    fasta_dict[name] = seq
+  return fasta_dict
+
+
 class Node:
   def __init__(self):
     self.children = []
