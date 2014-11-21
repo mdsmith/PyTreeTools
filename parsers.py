@@ -46,9 +46,11 @@ def json_to_fasta(  seqs_json,
                     accn = True,
                     collection_date=True,
                     definition=True,
-                    clean_names=True):
-  import re
+                    clean_names=True,
+                    filter_out=[]):
+  import re, sys
   from nameCleaner import clean_name
+  #print(filter_out, file=sys.stderr)
   fasta_dict = {}
   for accession, json_data in seqs_json.items():
     name = ""
@@ -60,6 +62,14 @@ def json_to_fasta(  seqs_json,
       features = json_data["FEATURES"]
       date = re.search('collection_date', features)
       if not date:
+        continue
+      skip = False
+      for word in filter_out:
+        if re.search(word, features) or re.search(word, name):
+          #print(word, file=sys.stderr)
+          #print(accession, file=sys.stderr)
+          skip = True
+      if skip:
         continue
       features = features[date.end():]
       date = features.split('\"')[1]
