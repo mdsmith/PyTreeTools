@@ -1,7 +1,105 @@
+def parse_fasta(fasta_file_name):
+  fh = open(fasta_file_name, 'r')
+  lines = fh.readlines()
+  seqs = {}
+  seq = ""
+  name = ""
+  for i,line in enumerate(lines):
+    if line[0] == '>' or i == len(lines) - 1:
+      if i == len(lines) - 1:
+        seq += line
+      if i != 0:
+        seqs[name.strip('\n')] = seq.strip('\n')
+      name = ""
+      seq = ""
+      name = line
+    else:
+      seq += line
+  return seqs
+
+def parse_nexus(nexus_file_name):
+  fh = open(nexus_file_name, 'r')
+  lines = fh.readlines()
+  seqs = {}
+  trees = {}
+  inTaxLabels = False
+  inMatrix = False
+  taxlabels = []
+  seq_list = []
+  for i,line in enumerate(lines):
+    if line.strip() == "":
+      continue
+    if line.strip() == "TAXLABELS":
+      inTaxLabels = True
+      continue
+    if line.strip() == "MATRIX":
+      inMatrix = True
+      continue
+    if line.strip().startswith("TREE"):
+      name, tree = line.split('=')
+      name = name.replace("TREE", "").strip()
+      print(name)
+      print(tree)
+      trees[name] = tree
+      continue
+    if inTaxLabels:
+      taxlabels = line.split(' ')
+      taxlabels = [t.strip('\t') for t in taxlabels]
+      taxlabels = [t.strip('\'') for t in taxlabels]
+      inTaxLabels = False
+    if inMatrix:
+      if line.strip() == "END;":
+        inMatrix = False
+        continue
+      seq = line.strip(';')
+      seq_list.append(seq)
+  seqs = dict(zip(taxlabels, seq_list))
+
+  return seqs, trees
+
 def emit_fasta(seqs):
   for name,seq in seqs.items():
     print(">" + name)
     print(seq)
+
+def fasta_to_phylip(seqs):
+  num = len(seqs)
+  length = len(list(seqs.values())[0])
+  p_seqs = []
+  for i,(name,seq) in enumerate(seqs.items()):
+    p_seq = ""
+    p_seq += name[:9]
+    p_seq += " "
+    p_seq += seq
+    p_seqs.append(p_seq)
+  return p_seqs, num, length
+
+def emit_phylip(seqs, num, length):
+    p_seqs, num, length = fasta_to_phylip(seqs)
+    print(" " + str(num) + " " + str(length))
+    for line in p_seqs:
+      print(line)
+
+def phylnames(seqs):
+  import string
+  import math
+  sorted_keys = sorted(seqs.keys())
+  p_chain = {}
+  for key in sorted_keys:
+    if key[1:9] not in p_chain:
+      p_chain[key[1:9]] = []
+    p_chain[key[1:9]].append(key)
+
+  p_seqs = {}
+  alpha = list(string.ascii_lowercase) + list(string.ascii_uppercase)
+  for name, key_list in p_chain.items():
+    if len(key_list) > 52:
+      for i,key in enumerate(key_list):
+        p_seqs[name[:-1] + alpha[math.floor(i/52)] + alpha[i%52]] = seqs[key]
+    else:
+      for i,key in enumerate(key_list):
+        p_seqs[name + alpha[i]] = seqs[key]
+  return p_seqs
 
 # file as lines
 def parse_gb(gb_file):
@@ -48,7 +146,8 @@ def json_to_fasta(  seqs_json,
                     definition=True,
                     clean_names=True,
                     filter_out=[]):
-  import re, sys
+  #import re, sys
+  import re
   from nameCleaner import clean_name
   #print(filter_out, file=sys.stderr)
   fasta_dict = {}
