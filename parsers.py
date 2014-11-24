@@ -38,8 +38,6 @@ def parse_nexus(nexus_file_name):
     if line.strip().startswith("TREE"):
       name, tree = line.split('=')
       name = name.replace("TREE", "").strip()
-      print(name)
-      print(tree)
       trees[name] = tree
       continue
     if inTaxLabels:
@@ -52,6 +50,7 @@ def parse_nexus(nexus_file_name):
         inMatrix = False
         continue
       seq = line.strip(';')
+      seq = line.replace(';', '')
       seq_list.append(seq)
   seqs = dict(zip(taxlabels, seq_list))
 
