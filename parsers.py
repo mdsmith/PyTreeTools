@@ -49,8 +49,10 @@ def parse_nexus(nexus_file_name):
       if line.strip() == "END;":
         inMatrix = False
         continue
-      seq = line.strip(';')
-      seq = line.replace(';', '')
+      seq = line.strip()
+      if seq.startswith('\''):
+        seq = seq.split('\'')[2].strip()
+      seq = seq.replace(';', '')
       seq_list.append(seq)
   seqs = dict(zip(taxlabels, seq_list))
 
