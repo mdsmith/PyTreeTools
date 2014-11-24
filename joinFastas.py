@@ -1,4 +1,8 @@
 #! /usr/bin/env python3
+#
+# Merge (concatenate) sequences under a single sequence name
+# Particularly useful for merging two genes.
+# Fasta names must match.
 
 import argparse
 
