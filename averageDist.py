@@ -18,6 +18,6 @@ if __name__ == "__main__":
   newick = parsers.parse_newick(args.newick_file)
   tree = parsers.Tree(newick[0].strip('\n'))
   if args.midpoint:
-    rooted_tree = midpoint_root(tree)
+    tree = midpoint_root(tree)
   print(tree.avg_dist(args.node))
 

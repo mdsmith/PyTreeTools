@@ -195,7 +195,7 @@ class Node:
     self.parent = None
     self.length = 0
     self.name = ""
-  def print_node(self, depth):
+  def print_node(self, depth=0):
     for _ in range(depth):
       print("\t", end="")
     if self.parent is not None:
@@ -361,9 +361,15 @@ class Tree:
       print(')', end="")
       print(node.name + ":" + str(node.length), end="")
 
-  def reroot(self, node_name):
+  def reroot(self, node_name, length=None):
+    if node_name == self.root.name:
+      return
     node = self.find_node(self.root, node_name)
     #node.print_node(0)
+    if length:
+      length_to_old_parent = float(node.length) - length
+      node.length = length
+      node.parent.length = length_to_old_parent
     new_root = Node()
     new_root.children.append(node)
     new_root.children.append(node.parent)
@@ -373,7 +379,7 @@ class Tree:
       self.reparent(c, new_root, node)
     self.root = new_root
     self.collapse_doubles(self.root)
-    new_root.print_node(0)
+    #new_root.print_node(0)
 
   def collapse_doubles(self, node):
     if len(node.children) == 0:
@@ -389,7 +395,7 @@ class Tree:
       self.collapse_doubles(node.children[0])
 
   def reparent(self, node, new_parent, old_child):
-    print("name: " + node.name)
+    #print("name: " + node.name)
     if node.parent == new_parent:
       return
     if node is old_child:
@@ -398,9 +404,9 @@ class Tree:
     elif node.parent is None:
       node.parent = new_parent
       node.children = [c for c in node.children if c is not old_child]
-      for c in node.children:
-        print(c.name)
-      print("new parent: " + node.parent.name)
+      #for c in node.children:
+        #print(c.name)
+      #print("new parent: " + node.parent.name)
     else:
       new_children = []
       if len(node.children) != 0:
@@ -410,14 +416,14 @@ class Tree:
         for c in node.children:
           if c is not old_child:
             new_children.append(c)
-        for c in new_children:
-          print(c.name)
-        print("new parent: " + new_parent.name)
+        #for c in new_children:
+          #print(c.name)
+        #print("new parent: " + new_parent.name)
         for c in new_children:
           self.reparent(c, node, node)
         node.children = [c for c in node.children if c is not old_child]
         node.children.append(old_parent)
-    print("")
+    #print("")
 
 def make_node_ret(ns, parent):
   cur = Node()
