@@ -53,13 +53,15 @@ def clean_name(inname):
     return ""
   else:
     outname = re.sub('[^a-zA-Z0-9\n\>]', '_', inname)
-    outname = re.sub('__', '_', outname)
+    while '__' in outname:
+        outname = re.sub('__', '_', outname)
     return outname
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument('infile', help="the file to clean")
-  parser.add_argument('-n', action='store_true', help="the file to clean")
+  parser.add_argument('-n', action='store_true', help="whether or not to \
+                          name otherwise nameless internal nodes")
   args = parser.parse_args()
   lines = parse_file(args.infile)
   clean = clean_seqs(lines, args.n)
