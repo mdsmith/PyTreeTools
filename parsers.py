@@ -1,3 +1,9 @@
+def parse_newick(newick_file):
+  fh = open(newick_file, 'r')
+  lines = fh.readlines()
+  #newick_validate(lines)
+  return lines
+
 def parse_fasta(fasta_file_name):
   fh = open(fasta_file_name, 'r')
   lines = fh.readlines()
@@ -322,9 +328,26 @@ class Tree:
   def print_tree(self):
     self.root.print_node(0)
 
-  def tree_to_newick(self):
+  def print_newick_tree(self):
     self.print_newick(self.root)
     print("\n")
+
+  def tree_to_newick(self):
+    newick = []
+    self.get_newick(self.root, newick)
+    return ''.join(newick)
+
+  def get_newick(self, node, newick):
+    if len(node.children) == 0:
+      newick.append(node.name + ":" + node.length)
+    else:
+      newick.append('(')
+      for i,c in enumerate(node.children):
+        self.get_newick(c, newick)
+        if i < len(node.children)-1:
+          newick.append(',')
+      newick.append(')')
+      newick.append(node.name + ":" + str(node.length))
 
   def print_newick(self, node):
     if len(node.children) == 0:
@@ -336,7 +359,7 @@ class Tree:
         if i < len(node.children)-1:
           print(',', end="")
       print(')', end="")
-      print(node.name + ":" + node.length, end="")
+      print(node.name + ":" + str(node.length), end="")
 
   def reroot(self, node_name):
     node = self.find_node(self.root, node_name)
