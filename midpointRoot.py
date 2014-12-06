@@ -21,7 +21,7 @@ def midpoint_root(tree):
         max_j = leaves[j+i]
   # find the lowest path between them. These are most distant, so this path
   # will still be the longest in the tree
-  path_between = path_through_lca(max_i, max_j)
+  path_between, lca = path_through_lca(max_i, max_j)
   #for node in path_between:
     #node.print_node()
   # find the appropriate branch to break
@@ -31,13 +31,15 @@ def midpoint_root(tree):
   cur_len = 0
   break_branch = None
   for node in path_between:
-    if cur_len < breakpoint and cur_len + float(node.length) > breakpoint:
-      break_branch = node
-      break
-    else:
-      cur_len += float(node.length)
+    if node != lca:
+      if cur_len < breakpoint and cur_len + float(node.length) > breakpoint:
+        break_branch = node
+        break
+      else:
+        cur_len += float(node.length)
   remaining_length = breakpoint - cur_len
   new_tree.reroot(break_branch.name,
+                  pointer=break_branch,
                   length=(float(break_branch.length) - remaining_length))
   #new_tree.print_tree()
 
@@ -61,7 +63,7 @@ def path_through_lca(node1, node2):
   n1_to_lca = node1_traversal[:node1_traversal.index(lca)+1]
   n2_to_lca = node2_traversal[:node2_traversal.index(lca)]
   path = n1_to_lca + n2_to_lca[::-1]
-  return path
+  return path, lca
 
 def lca(node1, node2):
   node1_traversal = tip_to_root(node1)

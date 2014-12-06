@@ -339,7 +339,7 @@ class Tree:
 
   def get_newick(self, node, newick):
     if len(node.children) == 0:
-      newick.append(node.name + ":" + node.length)
+      newick.append(node.name + ":" + str(node.length))
     else:
       newick.append('(')
       for i,c in enumerate(node.children):
@@ -361,25 +361,125 @@ class Tree:
       print(')', end="")
       print(node.name + ":" + str(node.length), end="")
 
-  def reroot(self, node_name, length=None):
+  # current hypothesis, need to make a new dummy root, make a second node for
+  # the node to be split, hitch them both up to the new dummy root, then
+  # destroy the old dummy root
+  def reroot(self, node_name, pointer=None, length=None):
     if node_name == self.root.name:
       return
-    node = self.find_node(self.root, node_name)
+    if pointer:
+      node = pointer
+    else:
+      node = self.find_node(self.root, node_name)
     #node.print_node(0)
     if length:
       length_to_old_parent = float(node.length) - length
       node.length = length
-      node.parent.length = length_to_old_parent
+      #node.parent.length = length_to_old_parent
     new_root = Node()
-    new_root.children.append(node)
-    new_root.children.append(node.parent)
     new_root.name = "new_RT"
-    new_root.length = "0"
-    for c in new_root.children:
-      self.reparent(c, new_root, node)
+    new_root.length = length_to_old_parent
+    new_root.children.append(node)
+
+    #new_twig = Node()
+    #new_twig.name = node.name + "_new"
+    #new_twig.length = length_to_old_parent
+
+    #new_twig.children.append(node.parent)
+
+    #new_root.children.append(new_twig)
+    #new_root.children.append(node)
+
+    #trav = [node]
+
+    #node.print_node()
+
+    #self.root.print_node()
+
+    self.replace_child(node.parent, node, new_root)
+    new_root.parent = node.parent
+    node.parent = new_root
+
+    #self.root.print_node()
+
+    trav = [new_root]
+    while trav[-1].parent:
+      trav.append(trav[-1].parent)
+
+    #print(len(trav))
+    #for t in trav:
+      #print(t.print_node())
+
+    new_parent = None
+    new_length = 0
+    for n in trav:
+      new_length = self.rotate(n, new_parent, new_length)
+      new_parent = n
+    #print("Residual: " + new_length)
+    #new_twig.parent = new_root
+
+    #for c in new_twig.children:
+      #self.reparent(c, new_twig, node)
+    new_root.parent = None
     self.root = new_root
+    #self.root.print_node()
+
     self.collapse_doubles(self.root)
     #new_root.print_node(0)
+
+  def replace_child(self, parent, old_child, new_child):
+    new_children = []
+    for c in parent.children:
+      if c is not old_child:
+        new_children.append(c)
+    new_children.append(new_child)
+    parent.children = new_children
+
+  def rotate(self, node, new_parent, length=None):
+    '''
+    print("Name: " + node.name)
+    if node.parent != None:
+      print("Parent: " + node.parent.name)
+    else:
+      print("Parent: None")
+    print("Length: " + str(node.length))
+    print("Children:")
+    for c in node.children:
+      print(c.name)
+    print("")
+    '''
+
+    if length == None:
+      length = new_parent.length
+    old_length = node.length
+
+    old_parent = node.parent
+
+    old_children = []
+    for c in node.children:
+      if c is not new_parent:
+        old_children.append(c)
+
+    node.length = length
+    node.parent = new_parent
+    node.children = []
+    if old_parent:
+      node.children.append(old_parent)
+    node.children += old_children
+
+    '''
+    print("Name: " + node.name)
+    if node.parent != None:
+      print("Parent: " + node.parent.name)
+    else:
+      print("Parent: None")
+    print("Length: " + str(node.length))
+    print("Children:")
+    for c in node.children:
+      print(c.name)
+    print("")
+    '''
+    return old_length
 
   def collapse_doubles(self, node):
     if len(node.children) == 0:
@@ -407,8 +507,43 @@ class Tree:
       #for c in node.children:
         #print(c.name)
       #print("new parent: " + node.parent.name)
+    elif new_parent in node.children or old_child in node.children:
+      '''
+      print("Node: " + node.name)
+      print("Old Parent: " + node.parent.name)
+      print("Old Children: ", end="")
+      for c in node.children:
+        print(c.name)
+      '''
+      old_parent = node.parent
+      old_children = []
+      for c in node.children:
+        if c is not old_child:
+          old_children.append(c)
+      old_siblings = []
+      for c in node.parent.children:
+        if c is not node:
+          old_siblings.append(c)
+
+      node.parent = new_parent
+      node.parent.children += old_children
+      node.children = []
+      node.children.append(old_parent)
+      node.children += old_siblings
+      '''
+      print("Node: " + node.name)
+      print("Parent: " + node.parent.name)
+      print("Children: ", end="")
+      for c in node.children:
+        print(c.name)
+      '''
+      #exit(0)
+      for c in node.children:
+        self.reparent(c, node, node)
     else:
-      new_children = []
+      node.parent = new_parent
+
+      '''
       if len(node.children) != 0:
         old_parent = node.parent
         node.parent = new_parent
@@ -420,10 +555,12 @@ class Tree:
           #print(c.name)
         #print("new parent: " + new_parent.name)
         for c in new_children:
+          new_parent.children.append(c)
           self.reparent(c, node, node)
         node.children = [c for c in node.children if c is not old_child]
         node.children.append(old_parent)
     #print("")
+    '''
 
 def make_node_ret(ns, parent):
   cur = Node()
