@@ -8,6 +8,7 @@ if __name__ == "__main__":
   parser.add_argument('gb_file', help="the GenBank file to convert")
   parser.add_argument('--filter',
                       nargs=argparse.REMAINDER,
+                      default=[],
                       help="keywords to disqualify sequences")
   args = parser.parse_args()
   gb_fh = open(args.gb_file, 'r')
