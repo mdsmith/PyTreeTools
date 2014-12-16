@@ -9,7 +9,7 @@ def parse_file(fasta_file_name):
   lines = fh.readlines()
   return lines
 
-def clean_seqs(contents, name):
+def clean_seqs(contents, name, num_ok=False):
   if contents[0][0] == ">":
     return clean_fasta(contents)
   else:
@@ -48,13 +48,17 @@ def is_num(s):
   except ValueError:
     return False
 
-def clean_name(inname):
-  if is_num(inname):
+def clean_name(inname, num_ok=False):
+  if is_num(inname) and not num_ok:
     return ""
+  elif is_num(inname) and num_ok:
+    return inname
   else:
     outname = re.sub('[^a-zA-Z0-9\n\>]', '_', inname)
     while '__' in outname:
         outname = re.sub('__', '_', outname)
+    while outname[-1] == '_':
+        outname = outname[:-1]
     return outname
 
 if __name__ == "__main__":
@@ -62,9 +66,12 @@ if __name__ == "__main__":
   parser.add_argument('infile', help="the file to clean")
   parser.add_argument('-n', action='store_true', help="whether or not to \
                           name otherwise nameless internal nodes")
+  parser.add_argument('--num_ok',
+                      action='store_true',
+                      help="allow numbers for names")
   args = parser.parse_args()
   lines = parse_file(args.infile)
-  clean = clean_seqs(lines, args.n)
+  clean = clean_seqs(lines, args.n, num_ok=args.num_ok)
   if isinstance(clean, list):
     for line in clean:
       print(line)

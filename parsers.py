@@ -164,22 +164,26 @@ def json_to_fasta(  seqs_json,
       name += accession
     if definition:
       name += "_" + json_data["DEFINITION"]
-    if collection_date:
+
+    add_tipdate = True
+    if add_tipdate:
       features = json_data["FEATURES"]
       date = re.search('collection_date', features)
-      if not date:
+      if collection_date and not date:
         continue
-      skip = False
-      for word in filter_out:
-        if re.search(word, features) or re.search(word, name):
-          #print(word, file=sys.stderr)
-          #print(accession, file=sys.stderr)
-          skip = True
-      if skip:
-        continue
-      features = features[date.end():]
-      date = features.split('\"')[1]
-      name += "_" + str(date)
+      elif date:
+        skip = False
+        for word in filter_out:
+          if re.search(word, features) or re.search(word, name):
+            #print(word, file=sys.stderr)
+            #print(accession, file=sys.stderr)
+            skip = True
+        if skip:
+          continue
+        features = features[date.end():]
+        date = features.split('\"')[1]
+        name += "_" + str(date)
+
     if clean_names:
       name = clean_name(name)
     rough_seq = json_data["ORIGIN"]
