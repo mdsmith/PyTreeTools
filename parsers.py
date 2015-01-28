@@ -222,6 +222,8 @@ class Tree:
   def find_node(self, cur, node_n):
     if cur.name == node_n:
       return cur
+    elif cur is node_n:
+      return cur
     else:
       for c in cur.children:
         find = self.find_node(c, node_n)

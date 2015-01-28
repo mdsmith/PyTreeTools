@@ -1,22 +1,43 @@
 #! /usr/bin/env python3
 #
-# Take a list of numbers and summarize them
+# Descriptive statistics!
 
 from math import floor
+from time import time
+
+# Decorator interlude.....
+
+def time_this(func):
+  def wrapper(*args):
+    start_time = time()
+    result = func(*args)
+    print("Time to find " + func.__name__ + ": " + str(time()-start_time))
+    return result
+  return wrapper
+
+def indent(space_count):
+  def decorator(func):
+    def wrapper(*args):
+      print(' ' * space_count, end="")
+      return func(*args)
+    return wrapper
+  return decorator
+
+# Actual statistics.....
 
 def print_descriptive_statistics(numbers):
   print("\nDescriptive Statistics: ")
   for key,value in get_descriptive_statistics(numbers).items():
-    print(key + ": " + value)
+    print("  -" + key + ": " + str(value))
   print("")
 
 def get_descriptive_statistics(numbers):
   stats = {}
-  stats["count"] = str(len(numbers))
-  stats["mean"] = str(mean(numbers))
-  stats["median"] = str(percentile(numbers))
-  stats["97.5%"] = str(percentile(numbers, 0.975))
-  stats["2.5%"] = str(percentile(numbers, 0.025))
+  stats["count"] = len(numbers)
+  stats["mean"] = mean(numbers)
+  stats["median"] = percentile(numbers)
+  stats["97.5%"] = percentile(numbers, 0.975)
+  stats["2.5%"] = percentile(numbers, 0.025)
   return stats
 
 def mean(numbers):
@@ -34,10 +55,4 @@ def percentile(numbers, percentile=.5):
     results.append(sorted_numbers[int(floor(len(numbers)*percentile))])
   return mean(results)
 
-def percentile_test():
-  numbers = list(range(0,9))
-  print(numbers)
-  print(percentile(numbers))
-  numbers = list(range(0,10))
-  print(numbers)
-  print(percentile(numbers))
+
